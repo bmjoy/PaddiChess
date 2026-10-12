@@ -7,7 +7,7 @@
 1. [安装指南](installation.md)：下载、平台包、首次启动、系统权限与更新。
 2. [快速上手](usage.md)：本地对弈、工作区、摆棋、分析和棋谱复盘。
 3. [外部接管](external-takeover.md)：连接与开始的区别、标准开局、校对、核验及接管历史。
-4. [引擎与模型](engines-and-models.md)：UCI 插件、原生规则、API 服务与思考等级。
+4. [引擎与模型](engines-and-models.md)：UCI 插件、规则校验、API 服务与思考等级。
 5. [性能说明](performance.md)：搜索预算、线程、内存、同步频率与测试范围。
 6. [数据与隐私](privacy-and-data.md)：本机持久数据、API 请求、截图与问题反馈。
 7. [排查指南](troubleshooting.md)：常见问题、恢复方法和有效的缺陷报告。

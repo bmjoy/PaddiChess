@@ -51,7 +51,7 @@
   <ItemGroup>
     <Content Include="../Pikafish.2026-09-25/$(BundledEngineFile)" Link="Engine/$(BundledEngineFile)" Condition="'$(BundledEngineFile)' != ''" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../Pikafish.2026-09-25/pikafish.nnue" Link="Engine/pikafish.nnue" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <!-- The 0925 archive includes its NNUE license; retain the standard GPL text from the vendored source. -->
+    <!-- The 0925 archive includes its NNUE license; retain the engine's standard GPL text. -->
     <Content Include="Native/PikafishRules/upstream/Copying.txt" Link="Engine/Copying.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="Packaging/Engine-README.md" Link="Engine/README.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../Pikafish.2026-09-25/作者&amp;算力贡献_Authors&amp;Contributor.txt" Link="Engine/AUTHORS" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
@@ -59,28 +59,8 @@
     <Content Include="../Pikafish.2026-09-25/AI引擎介绍_AI Engine Introduction.txt" Link="Engine/Introduction.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../Pikafish.2026-09-25/更新日志_Update Log.txt" Link="Engine/UpdateLog.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
-  <PropertyGroup>
-    <RulesRuntime Condition="'$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</RulesRuntime>
-    <RulesRuntime Condition="'$(RulesRuntime)' == ''">$(NETCoreSdkRuntimeIdentifier)</RulesRuntime>
-    <RulesExecutable>PaddiRules</RulesExecutable>
-    <RulesExecutable Condition="$(RulesRuntime.StartsWith('win-'))">PaddiRules.exe</RulesExecutable>
-  </PropertyGroup>
   <Target Name="ValidateBundledRuntime" BeforeTargets="PrepareForBuild">
     <Error Condition="'$(BundledEngineFile)' == ''" Text="Unsupported bundled runtime $(AssetRuntime). Supported targets: osx-arm64, osx-x64, win-x64 and linux-x64." />
-  </Target>
-  <ItemGroup>
-    <RulesSources Include="Native/PikafishRules/upstream/**/*;Native/PikafishRules/*.cpp;Native/PikafishRules/*.h;Native/PikafishRules/build.sh;Native/PikafishRules/build.ps1;Native/PikafishRules/SOURCE.md" />
-  </ItemGroup>
-  <Target Name="BuildNativeRules" BeforeTargets="PrepareForBuild" Inputs="@(RulesSources)" Outputs="$(MSBuildProjectDirectory)/Native/PikafishRules/bin/$(RulesRuntime)/$(RulesExecutable);$(MSBuildProjectDirectory)/Native/PikafishRules/bin/PikafishRules-source.zip">
-    <Exec Condition="$([MSBuild]::IsOSPlatform('OSX')) Or $([MSBuild]::IsOSPlatform('Linux'))" Command="bash &quot;$(MSBuildProjectDirectory)/Native/PikafishRules/build.sh&quot; &quot;$(RulesRuntime)&quot;" />
-    <Exec Condition="$([MSBuild]::IsOSPlatform('Windows'))" Command="powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)/Native/PikafishRules/build.ps1&quot; -Target &quot;$(RulesRuntime)&quot;" />
-  </Target>
-  <Target Name="IncludeNativeRules" BeforeTargets="AssignTargetPaths" DependsOnTargets="BuildNativeRules">
-    <Error Condition="!Exists('$(MSBuildProjectDirectory)/Native/PikafishRules/bin/$(RulesRuntime)/$(RulesExecutable)')" Text="Missing native rule component. Run Native/PikafishRules/build.sh (macOS/Linux) or build.ps1 (Windows) for $(RulesRuntime) first." />
-    <ItemGroup>
-      <Content Include="Native/PikafishRules/bin/$(RulesRuntime)/$(RulesExecutable)" Link="Native/$(RulesExecutable)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-      <Content Include="Native/PikafishRules/bin/PikafishRules-source.zip" Link="Native/PikafishRules-source.zip" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    </ItemGroup>
   </Target>
   <Target Name="BuildMacDesktopBridge" BeforeTargets="PrepareForBuild" Condition="$(AssetRuntime.StartsWith('osx-')) And $([MSBuild]::IsOSPlatform('OSX'))" Inputs="$(MSBuildProjectDirectory)/Native/PaddiBridge.swift;$(MSBuildProjectDirectory)/Native/CaptureGeometry.swift;$(MSBuildProjectDirectory)/Native/build-mac.sh" Outputs="$(MSBuildProjectDirectory)/Native/bin/PaddiBridge">
     <Exec Command="bash &quot;$(MSBuildProjectDirectory)/Native/build-mac.sh&quot;" />

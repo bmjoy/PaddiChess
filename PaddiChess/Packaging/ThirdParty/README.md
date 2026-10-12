@@ -50,7 +50,6 @@ Package versions, repository commits and notice hashes: [dependencies.json](depe
 
 Pikafish engine: see `Engine/Copying.txt`, `Engine/AUTHORS`, `Engine/README.md`.
 The engine NNUE weights have their own `Engine/NNUE-License.md`.
-The standalone rules helper's corresponding source is `Native/PikafishRules-source.zip`.
 OCR model: see `Assets/Ocr/SOURCE.md` and its Apache license.
 The macOS compatibility code notice is `Native/Licenses/yabai-MIT.txt`.
 The .NET runtime, if bundled, retains its own `LICENSE.txt` and `ThirdPartyNotices.txt`.

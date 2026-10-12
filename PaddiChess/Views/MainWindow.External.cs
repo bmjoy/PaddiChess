@@ -111,7 +111,6 @@ public partial class MainWindow
             if (_externalFrame?.Window is { } current && current.Id == selected.Id && current.Pid == selected.Pid)
             { if (_ready) RefreshExternalControls(); return; }
             _externalFrame = null; _externalCalibration = null;
-            _externalManualPosition = null;
             _externalCompleted = false;
             ExternalCalibrationText.Text = "窗口已改变，请重新标定";
             _externalPositionReady = false; _externalTurnKnown = false;
@@ -635,7 +634,7 @@ public partial class MainWindow
                         var redToMove = _game.RedToMove;
                         var recognitionGeometry = calibration;
                         recognitionRefresh.TryStart(recognitionIdentity, pending, observation, sessionClock.Elapsed,
-                            token => ReadVerifiedExternalPositionAsync(frame, recognitionGeometry, redToMove, token, false, skin, customPath));
+                            token => _positionRecognizer.ReadAsync(frame, recognitionGeometry, redToMove, token, false, skin, customPath));
                     }
                     ShowExternalRecovery(recognitionRefresh.IsRunning
                         ? "正在后台重新识别棋子，连接和棋谱已保留；核验合法着法后自动继续。"
@@ -753,7 +752,7 @@ public partial class MainWindow
                     var readySkin = _externalSessionSkin;
                     var readyPath = (ExternalSkinBox.SelectedItem as SkinChoice)?.Path;
                     inputVerification.TryStart(readyIdentity, null, observation, sessionClock.Elapsed,
-                        token => ReadVerifiedExternalPositionAsync(frame, readyGeometry, readyTurn,
+                        token => _positionRecognizer.ReadAsync(frame, readyGeometry, readyTurn,
                             token, false, readySkin, readyPath));
                 }
                 if (decisionTask == null && _externalPreparedDecision is { } prepared)
@@ -816,7 +815,7 @@ public partial class MainWindow
                 var legal = _game.AllControllerLegalMoves().Select(move => move.Uci).ToArray();
                 if (!legal.Contains(chosen)) throw new InvalidOperationException("执棋方返回非法着法，已停止接管。");
                 if (model is not null && decision.RuleAllowedMoves?.Contains(chosen) != true)
-                    throw new InvalidOperationException("模型着法没有通过皮卡鱼原生规则校验，未执行落子。");
+                    throw new InvalidOperationException("模型着法没有通过皮卡鱼规则校验，未执行落子。");
                 // Search/network latency can be long. Recheck the entire board immediately before sending input.
                 desktop.InputMode = ExternalInputBox.SelectedIndex == 1 ? ExternalInputMode.Drag : ExternalInputMode.Click;
                 desktop.InputDelivery = ExternalDeliveryBox.SelectedIndex switch
@@ -840,7 +839,7 @@ public partial class MainWindow
                     var verificationGeometry = calibration;
                     var verificationTurn = _game.RedToMove;
                     inputVerification.TryStart(verificationIdentity, null, check, sessionClock.Elapsed,
-                        token => ReadVerifiedExternalPositionAsync(beforeClick, verificationGeometry, verificationTurn,
+                        token => _positionRecognizer.ReadAsync(beforeClick, verificationGeometry, verificationTurn,
                             token, false, verificationSkin, verificationPath));
                     var reason = identityRead is { Uncertain.Count: > 0 }
                         ? $"正在核验 {identityRead.Uncertain.Count} 个不确定位置"
@@ -1001,7 +1000,6 @@ public partial class MainWindow
         var historyDrain = EndExternalHistoryAsync("用户断开连接");
         _externalPendingMove = null; _externalPendingThought = null; _externalMoveRecovery = null;
         _externalLinked = false; _externalCompleted = false; _externalTracker = null; _externalFrame = null; _externalCalibration = null;
-        _externalManualPosition = null;
         _externalRequestedTurn = null;
         _game.ExternalAdjudication = false;
         _externalPositionReady = false; ExternalCalibrationText.Text = "已断开，请重新标定";

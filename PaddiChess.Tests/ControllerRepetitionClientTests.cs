@@ -33,7 +33,7 @@ public class ControllerRepetitionClientTests
     }
 
     [Fact]
-    public async Task ModelReceivesNativeRuleCandidatesAndCannotReintroducePerpetualCheck()
+    public async Task ModelReceivesCSharpRuleCandidatesAndCannotReintroducePerpetualCheck()
     {
         var game = RepeatedPosition();
         await using var rules = new PikafishRulesClient();

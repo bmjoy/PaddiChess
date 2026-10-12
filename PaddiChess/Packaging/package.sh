@@ -48,7 +48,6 @@ package_mac() (
   cp "$PACKAGING/Info.plist" "$app/Contents/Info.plist"
   cp "$PACKAGING/Paddi.icns" "$app/Contents/Resources/Paddi.icns"
   codesign --force --identifier com.paddi.xiangqi.bridge --sign "$SIGNING_IDENTITY" "$app/Contents/MacOS/Native/PaddiBridge"
-  codesign --force --identifier com.paddi.xiangqi.rules --sign "$SIGNING_IDENTITY" "$app/Contents/MacOS/Native/PaddiRules"
   codesign --force --deep --identifier com.paddi.xiangqi --sign "$SIGNING_IDENTITY" "$app"
   codesign --verify --deep --strict "$app"
   ditto -c -k --sequesterRsrc --keepParent "$app" "$staging/$archive"

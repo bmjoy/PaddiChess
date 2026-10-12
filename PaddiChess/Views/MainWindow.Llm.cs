@@ -268,7 +268,7 @@ public partial class MainWindow
                 throw new InvalidOperationException("皮卡鱼规则校验后没有可选着法，模型执棋已暂停。");
             _llmThinkingRequest = $"{(red ? "红方" : "黑方")} · {settings.Model} · " +
                 $"思考等级 {ReasoningLabel(LlmControls(red).Reasoning.SelectedIndex)} · {legal.Count} 个引擎允许着法";
-            _llmThinkingValidation = $"皮卡鱼原生规则 · 已排除 {rules.Excluded.Count} 个违规着法";
+            _llmThinkingValidation = $"皮卡鱼规则 · 已排除 {rules.Excluded.Count} 个违规着法";
             UpdateLlmThinking();
             var progress = new Progress<LlmProgress>(report =>
             {
@@ -328,7 +328,7 @@ public partial class MainWindow
             SaveCurrentAnnotation(ply);
             if (!_game.TryMoveUci(reply.Move, out var move))
                 throw new InvalidOperationException("模型返回的着法未通过当前棋局规则校验，未执行落子。");
-            _llmThinkingValidation = "皮卡鱼原生规则与基本走法校验通过";
+            _llmThinkingValidation = "皮卡鱼规则与基本走法校验通过";
             _llmThinkingFinal = $"{move.Notation}（{move.Uci}）";
             _llmThinkingStage = "已落子";
             UpdateLlmThinking();

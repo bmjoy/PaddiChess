@@ -7,9 +7,9 @@
 - `.NET 10 SDK`：仓库 [`global.json`](../global.json) 以 `10.0.100` 为基准，允许兼容的后续 feature band，不使用预览版。
 - macOS：Xcode Command Line Tools，提供 `xcrun`、Swift、Clang 和 SDK；构建还使用 Python 3、Bash。
 - Linux x64：Clang、可用的 LTO 链接环境、Python 3、Bash，以及 Skia／ONNX 所需运行库。
-- Windows：.NET 10 SDK、PowerShell 5 或更新版本，以及 Zig 0.13.0。原生规则组件由构建自动生成；统一 Bash 验证入口仍用于 macOS／Linux。
+- Windows：.NET 10 SDK 与 PowerShell 5 或更新版本。规则校验由 C# 实现，无需 Zig 或额外原生编译器。
 
-首次 macOS 构建会编译 Swift 桥接和当前 RID 的 C++ 规则程序。构建产物不要提交源码仓库。
+首次 macOS 构建会编译 Swift 桥接。构建产物不要提交源码仓库。
 
 ## 获取源码与资源
 
@@ -27,11 +27,11 @@ cd PaddiChess
 | 象棋专用模型 | `PaddiChess/Assets/Recognition/xiangqi-nano-v3.onnx` | [来源、MIT 许可与 SHA-256](../PaddiChess/Assets/Recognition/SOURCE.md) |
 | OCR 模型 | `PaddiChess/Assets/Ocr/ch_PP-OCRv5_rec_mobile.onnx` | [来源与 SHA-256](../PaddiChess/Assets/Ocr/SOURCE.md) |
 | 测试样本 | `PaddiChess.Tests/Fixtures/` | 保留随样本提交的来源说明 |
-| 规则源码 | `PaddiChess/Native/PikafishRules/upstream/` | [0906 规则源码说明](../PaddiChess/Native/PikafishRules/SOURCE.md) |
+| 历史规则源码 | `PaddiChess/Native/PikafishRules/upstream/` | [源码说明](../PaddiChess/Native/PikafishRules/SOURCE.md)；不参与构建或分发 |
 
 发布按目标 RID 选择对应引擎；完整验证同时检查三平台发行资源，因此仅保留宿主的那个文件仍无法通过资源检查。资源版本应与清单匹配；不能随意用“最新”模型或权重替代。
 
-应用代码许可不覆盖全部资源：NNUE 按其随附协议使用，包含未经允许不得商用的限制。0925 主引擎随原始发行包分发，上游项目与源码入口见资源表中的来源说明；尚未独立核验该二进制与具体上游提交的对应关系。0906 规则组件源码 ZIP 仅对应独立的 `PaddiRules`，不能作为 0925 主引擎的对应源码。
+应用代码许可不覆盖全部资源：NNUE 按其随附协议使用，包含未经允许不得商用的限制。0925 主引擎随原始发行包分发，上游项目与源码入口见资源表中的来源说明；尚未独立核验该二进制与具体上游提交的对应关系。
 
 ## 完整验证入口
 
@@ -49,7 +49,7 @@ bash scripts/verify.sh
 4. Release 构建，使用 `-warnaserror`。
 5. 在该构建结果上运行完整测试项目，保存 TRX。
 
-输出位于 `artifacts/verification/<运行标识>/`，包括 SDK 信息、还原／构建／测试日志和 `verification.trx`。布局图位于 `artifacts/ui/`。该入口不发送真实鼠标输入、不为真实游戏发起对局，也不创建发行包、不使用开发者证书签名或公证；macOS 原生组件构建会执行本地 ad hoc 签名。
+输出位于 `artifacts/verification/<运行标识>/`，包括 SDK 信息、还原／构建／测试日志和 `verification.trx`。布局图位于 `artifacts/ui/`。该入口不发送真实鼠标输入、不为真实游戏发起对局，也不创建发行包、不使用开发者证书签名或公证；macOS 桌面桥接构建会执行本地 ad hoc 签名。
 
 通过数量、跳过数量和运行平台应一起记录。Windows 专用测试在非 Windows 上跳过属于范围说明；跨编译不等于实机通过。当前分支的最新结果以完整验证日志和对应 Release 为准，文档不固定一个会随新增测试失效的总数。
 
@@ -89,31 +89,16 @@ dotnet restore PaddiChess.slnx --locked-mode
 
 显式 `RuntimeIdentifier` 让项目引用在属性求值时选择对应锁文件。常规验证和打包不应自动改写依赖锁。
 
-## 原生规则构建
+## C# 规则校验
 
-原生规则由 `Native/PikafishRules/build.sh` 构建：
-
-```bash
-bash PaddiChess/Native/PikafishRules/build.sh osx-arm64
-```
-
-支持 `osx-arm64`、`osx-x64`、`win-x64`、`linux-x64`。macOS 上跨编译 Windows／Linux 需要 Zig，可用 `PADDI_ZIG` 指向已安装的可执行文件：
-
-```bash
-PADDI_ZIG="$(command -v zig)" \
-  bash PaddiChess/Native/PikafishRules/build.sh win-x64
-```
-
-Windows 宿主的 MSBuild 会调用 `Native/PikafishRules/build.ps1`，使用与 Bash 脚本相同的 C++ 源文件和编译参数生成 `PaddiRules.exe` 及对应源码 ZIP。先安装 Zig 0.13.0，并将 `zig.exe` 加入 PATH，或显式指定：
+模型候选校验与重复、长将和长捉判定位于 `PaddiChess/Engine/PikafishRulesClient.cs`，
+构建时随应用编译，不会启动独立规则进程，也不需要 Zig。可在 Windows 上直接验证：
 
 ```powershell
-$env:PADDI_ZIG = 'C:\tools\zig\zig.exe'
 dotnet restore 'PaddiChess.slnx' --locked-mode
 dotnet build 'PaddiChess/PaddiChess.csproj' -c Release --no-restore
 dotnet test 'PaddiChess.Tests/PaddiChess.Tests.csproj' -c Release
 ```
-
-此入口已完成代码审查；Windows 二进制经过 macOS 交叉构建，PowerShell 构建流程仍需要 Windows 本机验收。
 
 ## 打包
 
@@ -121,10 +106,10 @@ macOS 上的本地包示例：
 
 ```bash
 PADDI_SIGN_IDENTITY=- bash PaddiChess/Packaging/package.sh arm
-PADDI_ZIG="$(command -v zig)" bash PaddiChess/Packaging/package.sh windows
+bash PaddiChess/Packaging/package.sh windows
 ```
 
-其他目标为 `intel`、`linux`、`all`；输出默认在 `dist/`，可用 `PADDI_DIST_DIR` 改变。打包脚本发布自带运行时的应用，保留引擎、模型、规则组件、许可与源码 ZIP。
+其他目标为 `intel`、`linux`、`all`；输出默认在 `dist/`，可用 `PADDI_DIST_DIR` 改变。打包脚本发布自带运行时的应用，保留引擎、模型与许可文件。
 
 `PADDI_SIGN_IDENTITY=-` 明确选择 ad hoc 签名。正式签名可通过运行环境提供自己的有效身份，不能把私人证书、指纹、私钥或钥匙串导出物提交仓库。签名、公证与平台验收是独立步骤；成功 `dotnet publish` 不表示完成这些步骤。
 

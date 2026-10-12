@@ -58,7 +58,7 @@ public class SessionArchitectureTests
             new("http://127.0.0.1:1", "unused", "test"));
         var service = new ControllerDecisionService(rules, new LlmChessClient());
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => service.DecideAsync(request, engine, null, null, null, new(true)));
-        Assert.Equal(0, rules.ProcessStartCount); Assert.Equal(0, engine.ProcessStartCount);
+        Assert.Equal(0, rules.QueryCount); Assert.Equal(0, engine.ProcessStartCount);
     }
 
     [Fact]

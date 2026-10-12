@@ -21,7 +21,7 @@ case "$(uname -s):$(uname -m)" in
     ;;
   *)
     echo 'This verification entry point currently supports macOS arm64/x64 and Linux x64.' >&2
-    echo 'Windows requires a separately built PaddiRules.exe; see docs/architecture.md.' >&2
+    echo 'Windows builds and tests can be run directly with dotnet; see docs/development.md.' >&2
     exit 1
     ;;
 esac

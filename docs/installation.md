@@ -13,7 +13,7 @@
 | macOS Intel | 若该版本提供 `Paddi象棋-macOS-Intel.zip` | `Paddi象棋-Intel.app` |
 | Linux x64 | 若该版本提供 `Paddi象棋-Linux-x64.tar.gz` | `Paddi象棋` |
 
-发布包自带 .NET 运行时、本机引擎、NNUE、原生规则组件、象棋识别模型和 OCR 模型。完整解压，保留目录结构；不要只复制 `.exe` 或应用包内主程序。CPU 架构应与发布目标匹配。Linux 外部接管尚未实现；Intel 与 Linux 是否提供本次预构建附件，以 Release 为准。
+发布包自带 .NET 运行时、本机引擎、NNUE、象棋识别模型和 OCR 模型。完整解压，保留目录结构；不要只复制 `.exe` 或应用包内主程序。CPU 架构应与发布目标匹配。Linux 外部接管尚未实现；Intel 与 Linux 是否提供本次预构建附件，以 Release 为准。
 
 Windows 版要求 Windows 10 1903（18362）或更新系统。包内 `onnxruntime.dll`、`DirectML.dll` 与 `Microsoft.Windows.AI.MachineLearning.dll` 是一套匹配的识别运行库，请勿混用旧版 DLL。GPU 自动检测，无需安装 CUDA；NPU 的厂商提供程序要求 Windows 11 24H2 或更高，缺少或不兼容时仍可用 GPU / CPU。
 
@@ -37,7 +37,7 @@ macOS 14 及以上的捕获路径使用常驻 ScreenCaptureKit 会话；较早�
 
 1. 将 ZIP 完整解压到可写目录。
 2. 双击 `Paddi象棋.exe`，不需要另装 .NET。
-3. 保留 `Engine`、`Native`、`Assets`、DLL 和其他运行时文件。
+3. 保留 `Engine`、`Native`、`Assets`、DLL 和其他运行时文件；`Native` 目录用于 macOS 桌面桥接等平台组件。
 4. 接管前保持目标窗口可用，核对显示缩放与棋盘定位。切换显示器、DPI 或窗口大小后重新核对。
 
 捕获与输入受目标绘制方式、进程权限和桌面状态影响。跨编译和 ZIP 校验不能证明实际游戏已接收点击。本地棋盘正常、外部黑屏或无响应时，按[排查指南](troubleshooting.md)检查兼容性。
@@ -54,4 +54,4 @@ macOS 14 及以上的捕获路径使用常驻 ScreenCaptureKit 会话；较早�
 
 ## 第三方许可文件
 
-Windows 便携包的依赖许可位于 `Licenses`；macOS 应用内位于 `Contents/Resources/Licenses`。引擎、NNUE 与原生规则组件另外保留其来源、许可和源码说明。
+Windows 便携包的依赖许可位于 `Licenses`；macOS 应用内位于 `Contents/Resources/Licenses`。引擎与 NNUE 另外保留其来源和许可说明。

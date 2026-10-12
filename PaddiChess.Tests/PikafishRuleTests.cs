@@ -13,11 +13,11 @@ public class PikafishRuleTests
         return game;
     }
 
-    private static Task<NativeRuleMoves> Read(PikafishRulesClient rules, XiangqiGame game) =>
+    private static Task<RuleMoves> Read(PikafishRulesClient rules, XiangqiGame game) =>
         rules.GetAllowedMovesAsync(game.StartFen, game.UciMoveList, game.CurrentFen());
 
     [Fact]
-    public async Task NativeRulesKeepEveryOpeningMoveAndReuseProcessAndExactHistoryCache()
+    public async Task CSharpRulesKeepEveryOpeningMoveAndCacheExactHistory()
     {
         await using var rules = new PikafishRulesClient();
         var game = new XiangqiGame();
@@ -30,7 +30,6 @@ public class PikafishRuleTests
         var second = await Read(rules, game);
         Assert.Equal(game.AllLegalMoves().Select(move => move.Uci).Order(), second.Allowed.Order());
         Assert.Equal(2, rules.QueryCount);
-        Assert.Equal(1, rules.ProcessStartCount);
     }
 
     [Fact]
@@ -52,7 +51,7 @@ public class PikafishRuleTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task PerpetualChaseRespectsNativeProtectedPieceException(bool protectedPiece)
+    public async Task PerpetualChaseRespectsProtectedPieceException(bool protectedPiece)
     {
         await using var rules = new PikafishRulesClient();
         var game = Play((protectedPiece ? "1r2k4" : "4k4") + "/9/9/1n7/9/3RP4/9/9/9/4K4 w - - 0 1",
@@ -75,7 +74,7 @@ public class PikafishRuleTests
     }
 
     [Fact]
-    public async Task NativeDrawRepetitionsAreAllowedRatherThanForcedIntoDifferentMoves()
+    public async Task DrawRepetitionsAreAllowedRatherThanForcedIntoDifferentMoves()
     {
         await using var rules = new PikafishRulesClient();
         var game = Play(XiangqiGame.InitialFen, "b0c2 b9c7 c2b0 c7b9 b0c2 b9c7 c2b0 c7b9");

@@ -8,21 +8,21 @@ public sealed record ControllerDecisionRequest(string Fen, string StartFen, stri
     LlmConnectionSettings? Model = null);
 
 public sealed record ControllerDecision(string Fen, string Move, LlmMoveResult? Thought,
-    SearchResult? Search, NativeRuleMoves? Rules);
+    SearchResult? Search, RuleMoves? Rules);
 
 /// <summary>
 /// Executes a frozen controller request without accessing controls or the live game.
 /// Its host owns request cancellation and checks position/configuration identity before
-/// displaying progress or committing a result. No model response can bypass native rules.
+/// displaying progress or committing a result. No model response can bypass rule validation.
 /// </summary>
 public sealed class ControllerDecisionService(PikafishRulesClient rules, LlmChessClient models)
 {
     public async Task<ControllerDecision> DecideAsync(ControllerDecisionRequest request,
         PikafishClient engine, Action<EngineInfo>? engineProgress, IProgress<LlmProgress>? modelProgress,
-        Action<NativeRuleMoves>? rulesReady, CancellationToken ct)
+        Action<RuleMoves>? rulesReady, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
-        NativeRuleMoves? allowed = null;
+        RuleMoves? allowed = null;
         if (request.Model != null || (request.Bundled && request.Settings.Level < 12))
         {
             allowed = await rules.GetAllowedMovesAsync(request.StartFen, request.History, request.Fen, ct).ConfigureAwait(false);

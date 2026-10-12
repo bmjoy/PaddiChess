@@ -41,7 +41,7 @@ public partial class MainWindow
                 ExternalStatusText.Text = $"{model.Model} 思考中 · 等级 {model.ReasoningEffort ?? "自动"}";
                 ResetLlmThinking();
                 _llmThinkingRequest = $"外部接管 · {(red ? "红" : "黑")}方 · {model.Model} · 正在校验允许着法";
-                _llmThinkingValidation = "正在进行皮卡鱼原生规则校验";
+                _llmThinkingValidation = "正在进行皮卡鱼规则校验";
                 _llmThinkingSummary = "—"; _llmThinkingEffort = model.ReasoningEffort ?? "自动";
                 RefreshThinkingPanelVisibility(); UpdateLlmThinking();
                 var progress = new Progress<LlmProgress>(report =>
@@ -51,11 +51,11 @@ public partial class MainWindow
                     if (!string.IsNullOrWhiteSpace(report.VisibleThinking)) _llmThinkingSummary = report.VisibleThinking;
                     UpdateLlmThinking();
                 });
-                IProgress<NativeRuleMoves> rulesProgress = new Progress<NativeRuleMoves>(rules =>
+                IProgress<RuleMoves> rulesProgress = new Progress<RuleMoves>(rules =>
                 {
                     if (!Current()) return;
                     _llmThinkingRequest = $"外部接管 · {(red ? "红" : "黑")}方 · {model.Model} · {rules.Allowed.Count} 个引擎允许着法";
-                    _llmThinkingValidation = $"皮卡鱼原生规则 · 已排除 {rules.Excluded.Count} 个违规着法";
+                    _llmThinkingValidation = $"皮卡鱼规则 · 已排除 {rules.Excluded.Count} 个违规着法";
                     UpdateLlmThinking();
                 });
                 var decision = await decisions.DecideAsync(request, engine, null, progress, rulesProgress.Report, ct);
@@ -63,7 +63,7 @@ public partial class MainWindow
                 if (Current())
                 {
                     _llmThinkingSummary = thought.VisibleThinking ?? thought.Explanation ?? "服务未返回说明";
-                    _llmThinkingCandidate = thought.Move; _llmThinkingValidation = "皮卡鱼原生规则通过，等待外部落子确认";
+                    _llmThinkingCandidate = thought.Move; _llmThinkingValidation = "皮卡鱼规则通过，等待外部落子确认";
                     _llmThinkingStage = _externalRunning ? "等待落子" : "已预计算，等待开始接管";
                     UpdateLlmThinking();
                 }

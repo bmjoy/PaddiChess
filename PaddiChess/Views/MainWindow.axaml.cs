@@ -429,9 +429,9 @@ public partial class MainWindow : Window
                 .Select(move => move.Uci).ToArray();
             if (playMove && legalMoves.Length == 0)
                 throw new InvalidOperationException("当前没有合法着法，自动走棋已暂停；可检查棋谱或手动处理。");
-            // Low levels may choose a non-best MultiPV move. Apply native rules to
+            // Low levels may choose a non-best MultiPV move. Apply game rules to
             // that random selection too, without changing the engine's root search.
-            var nativeChoices = playMove && settings.Level < 12 && DefaultEngine.IsBundled
+            var ruleChoices = playMove && settings.Level < 12 && DefaultEngine.IsBundled
                 ? await _modelRules.GetAllowedMovesAsync(_game.StartFen, _game.UciMoveList,
                     _game.CurrentFen(), tokenSource.Token) : null;
             if (generation != _searchGeneration) return;
@@ -448,7 +448,7 @@ public partial class MainWindow : Window
                 UpdateScore(searchPly, redToMove, finalInfo);
             }
             ShowVariations(result.Candidates);
-            var chosen = ChooseMove(result, settings.Level, playMove, nativeChoices?.Allowed);
+            var chosen = ChooseMove(result, settings.Level, playMove, ruleChoices?.Allowed);
             if (chosen.Length != 4) throw new InvalidOperationException("引擎没有返回可用着法。");
             EngineStatusText.Text = $"{_engine.EngineName} · 搜索完成";
             if (ShowGuidance) BestMoveText.Text = DescribeUci(chosen);
